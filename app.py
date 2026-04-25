@@ -1,7 +1,4 @@
-import json
 import os
-from pathlib import Path
-from threading import Lock
 from typing import Any
 from urllib.parse import quote
 
@@ -10,10 +7,8 @@ from fastapi import FastAPI, HTTPException, Query
 
 
 API_TIMEOUT_SECONDS = float(os.getenv("BRAWL_API_TIMEOUT", "10"))
+API_AUTH_TOKEN = os.getenv("BRAWL_API_TOKEN", "").strip()
 API_BASE = os.getenv("BRAWL_API_BASE", "https://api.brawlstars.com/v1").rstrip("/")
-KEYS_FILE = Path(os.getenv("BRAWL_API_KEYS_FILE", "./db/api_keys.json"))
-KEY_STATE_FILE = Path(os.getenv("BRAWL_API_KEY_STATE_FILE", "./db/api_key_state.json"))
-KEY_ROTATION_LOCK = Lock()
 
 
 app = FastAPI(title="Brawl Proxy", version="0.1.0")
@@ -68,52 +63,10 @@ async def resolve_location_id(location: str) -> str:
     raise HTTPException(status_code=400, detail=f"unknown location: {location}")
 
 
-def read_json_file(path: Path, default: Any) -> Any:
-    try:
-        if not path.exists():
-            return default
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return default
-
-
-def write_json_file(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def load_enabled_tokens() -> list[str]:
-    raw = read_json_file(KEYS_FILE, {"keys": []})
-    items = raw.get("keys", []) if isinstance(raw, dict) else raw
-    tokens: list[str] = []
-
-    for item in items:
-        if isinstance(item, str):
-            token = item.strip()
-            if token:
-                tokens.append(token)
-            continue
-
-        if isinstance(item, dict):
-            token = str(item.get("token", "")).strip()
-            enabled = bool(item.get("enabled", True))
-            if token and enabled:
-                tokens.append(token)
-
-    return tokens
-
-
 def require_token() -> str:
-    with KEY_ROTATION_LOCK:
-        tokens = load_enabled_tokens()
-        if not tokens:
-            raise HTTPException(status_code=500, detail="no enabled API keys in db/api_keys.json")
-
-        state = read_json_file(KEY_STATE_FILE, {"next_index": 0})
-        next_index = int(state.get("next_index", 0)) if isinstance(state, dict) else 0
-        token = tokens[next_index % len(tokens)]
-        write_json_file(KEY_STATE_FILE, {"next_index": (next_index + 1) % len(tokens)})
-        return token
+    if not API_AUTH_TOKEN:
+        raise HTTPException(status_code=500, detail="BRAWL_API_TOKEN is missing")
+    return API_AUTH_TOKEN
 
 
 async def fetch_json(base_url: str, path: str, **params: Any) -> Any:

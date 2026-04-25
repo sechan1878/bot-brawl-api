@@ -1,0 +1,12 @@
+{
+  "ROOM-KEY-001": {
+    "label": "sample_room",
+    "enabled": true,
+    "room": ""
+  },
+  "ROOM-KEY-002": {
+    "label": "backup_room",
+    "enabled": false,
+    "room": ""
+  }
+}

@@ -1,11 +1,20 @@
 const PROXY_BASE_URL = "https://YOUR-RENDER-SERVICE.onrender.com";
-const STORAGE_PATH = "sdcard/msgbot/brawl_tags.json";
-const CLUB_STORAGE_PATH = "sdcard/msgbot/brawl_clubs.json";
-const PLAYER_ALIAS_PATH = "sdcard/msgbot/brawl_aliases.json";
-const CHAT_RANK_PATH = "sdcard/msgbot/brawl_chat_rank.json";
+const DB_DIR = "sdcard/msgbot/db/";
+const STORAGE_PATH = DB_DIR + "brawl_tags.json";
+const CLUB_STORAGE_PATH = DB_DIR + "brawl_clubs.json";
+const PLAYER_ALIAS_PATH = DB_DIR + "brawl_aliases.json";
+const CLUB_ALIAS_PATH = DB_DIR + "brawl_club_aliases.json";
+const CHAT_RANK_PATH = DB_DIR + "brawl_chat_rank.json";
+const ROOM_KEY_PATH = DB_DIR + "brawl_room_keys.json";
+const ROOM_REGISTRY_PATH = DB_DIR + "brawl_room_registry.json";
 const MAX_BATTLES = 5;
 const RANK_LIMIT = 5;
 
+const CMD_ROOM_AUTH = "/\uBE0C\uB864\uC778\uC99D ";
+const CMD_ROOM_STATUS = "/\uBE0C\uB864\uC778\uC99D\uC0C1\uD0DC";
+const CMD_REGISTER_USER = "/\uB4F1\uB85D \uC720\uC800 ";
+const CMD_REGISTER_CLUB = "/\uB4F1\uB85D \uD074\uB7FD ";
+const CMD_REGISTER_LIST = "/\uB4F1\uB85D\uBAA9\uB85D";
 const CMD_SAVE_TAG = "/\uBE0C\uB864\uC800\uC7A5 ";
 const CMD_INFO = "/\uBE0C\uB864\uC815\uBCF4";
 const CMD_INFO_WITH_ARG = "/\uBE0C\uB864\uC815\uBCF4 ";
@@ -30,9 +39,48 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
     return;
   }
 
-  trackChat(room, sender);
-
   try {
+    if (msg.startsWith(CMD_ROOM_AUTH)) {
+      handleRoomAuth(room, msg, replier);
+      return;
+    }
+
+    if (msg === CMD_ROOM_STATUS) {
+      replier.reply(buildRoomStatus(room));
+      return;
+    }
+
+    if (msg === CMD_REGISTER_LIST) {
+      replier.reply(buildAliasRegistrySummary());
+      return;
+    }
+
+    if (msg === CMD_HELP) {
+      replier.reply(buildHelpText());
+      return;
+    }
+
+    if (!isAuthorizedRoom(room)) {
+      replier.reply(
+        "\uC774 \uBC29\uC740 \uC544\uC9C1 \uC778\uC99D\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.\n`/" +
+        "\uBE0C\uB864\uC778\uC99D \uD0A4`\uB85C \uBA3C\uC800 \uD65C\uC131\uD654\uD574 \uC8FC\uC138\uC694."
+      );
+      return;
+    }
+
+    trackChat(room, sender);
+    touchRoomUsage(room);
+
+    if (msg.startsWith(CMD_REGISTER_USER)) {
+      handleRegisterUserAlias(msg, replier);
+      return;
+    }
+
+    if (msg.startsWith(CMD_REGISTER_CLUB)) {
+      handleRegisterClubAlias(msg, replier);
+      return;
+    }
+
     if (msg.startsWith(CMD_SAVE_TAG)) {
       handleSaveTag(msg, sender, replier);
       return;
@@ -112,13 +160,79 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
       replier.reply(buildChatRankSummary(room));
       return;
     }
-
-    if (msg === CMD_HELP) {
-      replier.reply(buildHelpText());
-    }
   } catch (error) {
     replier.reply("\uC624\uB958: " + safe(error.message || String(error)));
   }
+}
+
+function handleRoomAuth(room, msg, replier) {
+  const rawKey = msg.substring(CMD_ROOM_AUTH.length).trim();
+  if (!rawKey) {
+    throw new Error("\uC778\uC99D \uD0A4\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+  }
+
+  const roomKeys = readJson(ROOM_KEY_PATH);
+  const normalizedKey = String(rawKey).trim();
+  const keyInfo = roomKeys[normalizedKey];
+  if (!keyInfo || keyInfo.enabled === false) {
+    throw new Error("\uC720\uD6A8\uD558\uC9C0 \uC54A\uC740 \uD0A4\uC785\uB2C8\uB2E4.");
+  }
+
+  const registry = readJson(ROOM_REGISTRY_PATH);
+  if (keyInfo.room && keyInfo.room !== room) {
+    throw new Error("\uC774 \uD0A4\uB294 \uC774\uBBF8 \uB2E4\uB978 \uBC29\uC5D0 \uC5F0\uACB0\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.");
+  }
+
+  roomKeys[normalizedKey].room = room;
+  roomKeys[normalizedKey].lastActivatedAt = nowIso();
+  registry[room] = {
+    key: normalizedKey,
+    label: safe(keyInfo.label || ""),
+    activatedAt: registry[room] && registry[room].activatedAt ? registry[room].activatedAt : nowIso(),
+    lastUsedAt: nowIso()
+  };
+
+  writeJson(ROOM_KEY_PATH, roomKeys);
+  writeJson(ROOM_REGISTRY_PATH, registry);
+
+  replier.reply(
+    [
+      "\uBC29 \uC778\uC99D\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
+      "\uBC29: " + safe(room),
+      "\uD0A4 \uB77C\uBCA8: " + safe(keyInfo.label || "")
+    ].join("\n")
+  );
+}
+
+function buildRoomStatus(room) {
+  const registry = readJson(ROOM_REGISTRY_PATH);
+  const info = registry[room];
+  if (!info) {
+    return "[\uBC29 \uC778\uC99D \uC0C1\uD0DC]\n\uBBF8\uC778\uC99D";
+  }
+
+  return [
+    "[\uBC29 \uC778\uC99D \uC0C1\uD0DC]",
+    "\uBC29: " + safe(room),
+    "\uD0A4: " + maskKey(info.key),
+    "\uB77C\uBCA8: " + safe(info.label || ""),
+    "\uCD5C\uCD08 \uC778\uC99D: " + safe(info.activatedAt || ""),
+    "\uB9C8\uC9C0\uB9C9 \uC0AC\uC6A9: " + safe(info.lastUsedAt || "")
+  ].join("\n");
+}
+
+function isAuthorizedRoom(room) {
+  const registry = readJson(ROOM_REGISTRY_PATH);
+  return !!registry[room];
+}
+
+function touchRoomUsage(room) {
+  const registry = readJson(ROOM_REGISTRY_PATH);
+  if (!registry[room]) {
+    return;
+  }
+  registry[room].lastUsedAt = nowIso();
+  writeJson(ROOM_REGISTRY_PATH, registry);
 }
 
 function handleSaveTag(msg, sender, replier) {
@@ -132,6 +246,36 @@ function handleSaveTag(msg, sender, replier) {
       "\uB2C9\uB124\uC784: " + safe(player.name),
       "\uD0DC\uADF8: #" + tag,
       "\uC774\uC81C `/" + "\uBE0C\uB864\uC815\uBCF4` \uB610\uB294 `/" + "\uBE0C\uB864\uC804\uC801`\uC744 \uC4F0\uBA74 \uB429\uB2C8\uB2E4."
+    ].join("\n")
+  );
+}
+
+function handleRegisterUserAlias(msg, replier) {
+  const parsed = parseAliasRegistration(msg.substring(CMD_REGISTER_USER.length));
+  const aliases = readJson(PLAYER_ALIAS_PATH);
+  aliases[parsed.alias] = normalizeTag(parsed.target);
+  writeJson(PLAYER_ALIAS_PATH, aliases);
+
+  replier.reply(
+    [
+      "\uC720\uC800 \uBCC4\uCE6D\uC744 \uB4F1\uB85D\uD588\uC2B5\uB2C8\uB2E4.",
+      "\uBCC4\uCE6D: " + parsed.alias,
+      "\uD0DC\uADF8: #" + normalizeTag(parsed.target)
+    ].join("\n")
+  );
+}
+
+function handleRegisterClubAlias(msg, replier) {
+  const parsed = parseAliasRegistration(msg.substring(CMD_REGISTER_CLUB.length));
+  const aliases = readJson(CLUB_ALIAS_PATH);
+  aliases[parsed.alias] = normalizeTag(parsed.target);
+  writeJson(CLUB_ALIAS_PATH, aliases);
+
+  replier.reply(
+    [
+      "\uD074\uB7FD \uBCC4\uCE6D\uC744 \uB4F1\uB85D\uD588\uC2B5\uB2C8\uB2E4.",
+      "\uBCC4\uCE6D: " + parsed.alias,
+      "\uD0DC\uADF8: #" + normalizeTag(parsed.target)
     ].join("\n")
   );
 }
@@ -204,7 +348,7 @@ function handleSavedClubInfo(sender, replier) {
 }
 
 function handleClubInfoByTag(msg, replier) {
-  const clubTag = normalizeTag(msg.substring(CMD_CLUB_INFO_WITH_ARG.length).trim());
+  const clubTag = resolveClubTagInput(msg.substring(CMD_CLUB_INFO_WITH_ARG.length).trim());
   replier.reply(buildClubInfoSummary(clubTag));
 }
 
@@ -221,7 +365,7 @@ function handleSavedClubMembers(sender, replier) {
 }
 
 function handleClubMembersByTag(msg, replier) {
-  const clubTag = normalizeTag(msg.substring(CMD_CLUB_MEMBERS_WITH_ARG.length).trim());
+  const clubTag = resolveClubTagInput(msg.substring(CMD_CLUB_MEMBERS_WITH_ARG.length).trim());
   replier.reply(buildClubMembersSummary(clubTag));
 }
 
@@ -246,6 +390,11 @@ function handleBrawlerRanking(msg, replier) {
 function buildHelpText() {
   return [
     "[\uBE0C\uB864 \uC804\uC801 \uBD07 \uB3C4\uC6C0\uB9D0]",
+    "/\uBE0C\uB864\uC778\uC99D \uD0A4",
+    "/\uBE0C\uB864\uC778\uC99D\uC0C1\uD0DC",
+    "/\uB4F1\uB85D \uC720\uC800 \uBCC4\uCE6D #\uD0DC\uADF8",
+    "/\uB4F1\uB85D \uD074\uB7FD \uBCC4\uCE6D #\uD074\uB7FD\uD0DC\uADF8",
+    "/\uB4F1\uB85D\uBAA9\uB85D",
     "/\uBE0C\uB864\uC800\uC7A5 #\uD0DC\uADF8",
     "/\uBE0C\uB864\uC815\uBCF4",
     "/\uBE0C\uB864\uC815\uBCF4 #\uD0DC\uADF8|\uBCC4\uCE6D",
@@ -263,6 +412,22 @@ function buildHelpText() {
     "/\uBE0C\uB864\uC774\uBCA4\uD2B8",
     "/\uCC44\uD305\uC21C\uC704"
   ].join("\n");
+}
+
+function buildAliasRegistrySummary() {
+  const playerAliases = readJson(PLAYER_ALIAS_PATH);
+  const clubAliases = readJson(CLUB_ALIAS_PATH);
+  const lines = ["[\uB4F1\uB85D \uBAA9\uB85D]"];
+
+  lines.push("");
+  lines.push("[\uC720\uC800]");
+  lines.push(...formatGroupedAliases(playerAliases));
+
+  lines.push("");
+  lines.push("[\uD074\uB7FD]");
+  lines.push(...formatGroupedAliases(clubAliases));
+
+  return lines.join("\n");
 }
 
 function proxyGet(path, params) {
@@ -720,6 +885,73 @@ function resolvePlayerTagInput(input) {
   throw new Error("\uB4F1\uB85D\uB41C \uBCC4\uCE6D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4: " + raw);
 }
 
+function resolveClubTagInput(input) {
+  const raw = String(input || "").trim();
+  if (!raw) {
+    throw new Error("\uD074\uB7FD \uD0DC\uADF8 \uB610\uB294 \uBCC4\uCE6D\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+  }
+
+  if (raw.indexOf("#") === 0 || /^[0-9A-Z]+$/i.test(raw)) {
+    return normalizeTag(raw);
+  }
+
+  const aliases = readJson(CLUB_ALIAS_PATH);
+  if (aliases[raw]) {
+    return normalizeTag(aliases[raw]);
+  }
+
+  const lowered = raw.toLowerCase();
+  for (const key in aliases) {
+    if (Object.prototype.hasOwnProperty.call(aliases, key) && String(key).toLowerCase() === lowered) {
+      return normalizeTag(aliases[key]);
+    }
+  }
+
+  throw new Error("\uB4F1\uB85D\uB41C \uD074\uB7FD \uBCC4\uCE6D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4: " + raw);
+}
+
+function parseAliasRegistration(raw) {
+  const text = String(raw || "").trim();
+  const match = text.match(/^(\S+)\s+(.+)$/);
+  if (!match) {
+    throw new Error("\uD615\uC2DD: \uBCC4\uCE6D \uD0DC\uADF8");
+  }
+
+  return {
+    alias: match[1],
+    target: match[2]
+  };
+}
+
+function formatGroupedAliases(source) {
+  const grouped = {};
+
+  for (const alias in source) {
+    if (!Object.prototype.hasOwnProperty.call(source, alias)) {
+      continue;
+    }
+
+    const target = "#" + normalizeTag(source[alias]);
+    if (!grouped[target]) {
+      grouped[target] = [];
+    }
+    grouped[target].push(alias);
+  }
+
+  const targets = Object.keys(grouped).sort();
+  if (!targets.length) {
+    return ["\uB4F1\uB85D\uB41C \uD56D\uBAA9 \uC5C6\uC74C"];
+  }
+
+  const lines = [];
+  for (let i = 0; i < targets.length; i += 1) {
+    const target = targets[i];
+    const aliases = grouped[target].sort();
+    lines.push(target + ": " + aliases.join(" "));
+  }
+  return lines;
+}
+
 function formatOwnedBrawlerLine(brawler) {
   const gadgets = brawler.gadgets ? brawler.gadgets.length : 0;
   const starPowers = brawler.starPowers ? brawler.starPowers.length : 0;
@@ -819,6 +1051,18 @@ function trackChat(room, sender) {
   }
   data[room][sender] += 1;
   writeJson(CHAT_RANK_PATH, data);
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function maskKey(value) {
+  const key = String(value || "");
+  if (key.length <= 4) {
+    return key;
+  }
+  return key.substring(0, 2) + "***" + key.substring(key.length - 2);
 }
 
 function number(value) {

@@ -21,7 +21,7 @@ Thin Render proxy for the official Brawl Stars API.
 - Runtime: `Python`
 - Build Command: `pip install -r requirements.txt`
 - Start Command: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-- API keys are loaded from `db/api_keys.json`
+- Required env var: `BRAWL_API_TOKEN`
 
 ## Upstream official API
 
@@ -38,23 +38,48 @@ Thin Render proxy for the official Brawl Stars API.
 
 ## MessengerBot files
 
-- `brawl_messengerbot_render.js`
+- `브롤봇.js`
 - `db/brawl_tags.json`
 - `db/brawl_clubs.json`
 - `db/brawl_aliases.json`
+- `db/brawl_club_aliases.json`
 - `db/brawl_chat_rank.json`
+- `db/brawl_room_keys.json`
+- `db/brawl_room_registry.json`
 
-Copy the JSON files to:
+Put files like this:
 
-- `sdcard/msgbot/brawl_tags.json`
-- `sdcard/msgbot/brawl_clubs.json`
-- `sdcard/msgbot/brawl_aliases.json`
-- `sdcard/msgbot/brawl_chat_rank.json`
+- `sdcard/msgbot/브롤봇.js`
+- `sdcard/msgbot/db/brawl_tags.json`
+- `sdcard/msgbot/db/brawl_clubs.json`
+- `sdcard/msgbot/db/brawl_aliases.json`
+- `sdcard/msgbot/db/brawl_club_aliases.json`
+- `sdcard/msgbot/db/brawl_chat_rank.json`
+- `sdcard/msgbot/db/brawl_room_keys.json`
+- `sdcard/msgbot/db/brawl_room_registry.json`
 
-## API key DB
+## Quick setup
 
-Edit `db/api_keys.json` and enable the keys you want to use.
-The proxy rotates to the next enabled key on every upstream API call.
+1. Put `브롤봇.js` into `sdcard/msgbot/`
+2. Put the whole `db` folder into `sdcard/msgbot/`
+3. Edit `브롤봇.js` and set `PROXY_BASE_URL`
+4. Edit `db/brawl_room_keys.json` and choose your room key
+5. In chat, run `/브롤인증 ROOM-KEY-001`
+
+## Alias registration
+
+- `/등록 유저 별칭 #태그`
+- `/등록 클럽 별칭 #클럽태그`
+- `/등록목록`
+
+## Room activation keys
+
+Edit `db/brawl_room_keys.json` and register the rooms with:
+
+- `/브롤인증 ROOM-KEY-001`
+- `/브롤인증상태`
+
+Only activated rooms can use the bot commands.
 
 ## MessengerBot files
 
