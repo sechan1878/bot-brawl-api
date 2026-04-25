@@ -1,37 +1,37 @@
-const PROXY_BASE_URL = "https://YOUR-RENDER-SERVICE.onrender.com";
-const DB_DIR = "sdcard/msgbot/db/";
-const STORAGE_PATH = DB_DIR + "brawl_tags.json";
-const CLUB_STORAGE_PATH = DB_DIR + "brawl_clubs.json";
-const PLAYER_ALIAS_PATH = DB_DIR + "brawl_aliases.json";
-const CLUB_ALIAS_PATH = DB_DIR + "brawl_club_aliases.json";
-const CHAT_RANK_PATH = DB_DIR + "brawl_chat_rank.json";
-const ROOM_KEY_PATH = DB_DIR + "brawl_room_keys.json";
-const ROOM_REGISTRY_PATH = DB_DIR + "brawl_room_registry.json";
-const MAX_BATTLES = 5;
-const RANK_LIMIT = 5;
+var PROXY_BASE_URL = "https://YOUR-RENDER-SERVICE.onrender.com";
+var DB_DIR = "sdcard/msgbot/db/";
+var STORAGE_PATH = DB_DIR + "brawl_tags.json";
+var CLUB_STORAGE_PATH = DB_DIR + "brawl_clubs.json";
+var PLAYER_ALIAS_PATH = DB_DIR + "brawl_aliases.json";
+var CLUB_ALIAS_PATH = DB_DIR + "brawl_club_aliases.json";
+var CHAT_RANK_PATH = DB_DIR + "brawl_chat_rank.json";
+var ROOM_KEY_PATH = DB_DIR + "brawl_room_keys.json";
+var ROOM_REGISTRY_PATH = DB_DIR + "brawl_room_registry.json";
+var MAX_BATTLES = 5;
+var RANK_LIMIT = 5;
 
-const CMD_ROOM_AUTH = "/\uBE0C\uB864\uC778\uC99D ";
-const CMD_ROOM_STATUS = "/\uBE0C\uB864\uC778\uC99D\uC0C1\uD0DC";
-const CMD_REGISTER_USER = "/\uB4F1\uB85D \uC720\uC800 ";
-const CMD_REGISTER_CLUB = "/\uB4F1\uB85D \uD074\uB7FD ";
-const CMD_REGISTER_LIST = "/\uB4F1\uB85D\uBAA9\uB85D";
-const CMD_SAVE_TAG = "/\uBE0C\uB864\uC800\uC7A5 ";
-const CMD_INFO = "/\uBE0C\uB864\uC815\uBCF4";
-const CMD_INFO_WITH_ARG = "/\uBE0C\uB864\uC815\uBCF4 ";
-const CMD_BATTLE = "/\uBE0C\uB864\uC804\uC801";
-const CMD_BATTLE_WITH_ARG = "/\uBE0C\uB864\uC804\uC801 ";
-const CMD_CLUB_SEARCH = "/\uBE0C\uB864\uD074\uB7FD\uAC80\uC0C9 ";
-const CMD_SAVE_CLUB = "/\uBE0C\uB864\uD074\uB7FD\uC800\uC7A5 ";
-const CMD_CLUB_INFO = "/\uBE0C\uB864\uD074\uB7FD\uC815\uBCF4";
-const CMD_CLUB_INFO_WITH_ARG = "/\uBE0C\uB864\uD074\uB7FD\uC815\uBCF4 ";
-const CMD_CLUB_MEMBERS = "/\uBE0C\uB864\uD074\uB7FD\uC6D0";
-const CMD_CLUB_MEMBERS_WITH_ARG = "/\uBE0C\uB864\uD074\uB7FD\uC6D0 ";
-const CMD_TOTAL_RANK = "/\uBE0C\uB864\uCD1D\uB7AD\uD0B9";
-const CMD_CLUB_RANK = "/\uBE0C\uB864\uD074\uB7FD\uB7AD\uD0B9";
-const CMD_BRAWLER_RANK = "/\uBE0C\uB864\uBE0C\uB864\uB7EC\uB7AD\uD0B9 ";
-const CMD_EVENTS = "/\uBE0C\uB864\uC774\uBCA4\uD2B8";
-const CMD_CHAT_RANK = "/\uCC44\uD305\uC21C\uC704";
-const CMD_HELP = "/\uBE0C\uB864\uB3C4\uC6C0\uB9D0";
+var CMD_ROOM_AUTH = "/\uBE0C\uB864\uC778\uC99D ";
+var CMD_ROOM_STATUS = "/\uBE0C\uB864\uC778\uC99D\uC0C1\uD0DC";
+var CMD_REGISTER_USER = "/\uB4F1\uB85D \uC720\uC800 ";
+var CMD_REGISTER_CLUB = "/\uB4F1\uB85D \uD074\uB7FD ";
+var CMD_REGISTER_LIST = "/\uB4F1\uB85D\uBAA9\uB85D";
+var CMD_SAVE_TAG = "/\uBE0C\uB864\uC800\uC7A5 ";
+var CMD_INFO = "/\uBE0C\uB864\uC815\uBCF4";
+var CMD_INFO_WITH_ARG = "/\uBE0C\uB864\uC815\uBCF4 ";
+var CMD_BATTLE = "/\uBE0C\uB864\uC804\uC801";
+var CMD_BATTLE_WITH_ARG = "/\uBE0C\uB864\uC804\uC801 ";
+var CMD_CLUB_SEARCH = "/\uBE0C\uB864\uD074\uB7FD\uAC80\uC0C9 ";
+var CMD_SAVE_CLUB = "/\uBE0C\uB864\uD074\uB7FD\uC800\uC7A5 ";
+var CMD_CLUB_INFO = "/\uBE0C\uB864\uD074\uB7FD\uC815\uBCF4";
+var CMD_CLUB_INFO_WITH_ARG = "/\uBE0C\uB864\uD074\uB7FD\uC815\uBCF4 ";
+var CMD_CLUB_MEMBERS = "/\uBE0C\uB864\uD074\uB7FD\uC6D0";
+var CMD_CLUB_MEMBERS_WITH_ARG = "/\uBE0C\uB864\uD074\uB7FD\uC6D0 ";
+var CMD_TOTAL_RANK = "/\uBE0C\uB864\uCD1D\uB7AD\uD0B9";
+var CMD_CLUB_RANK = "/\uBE0C\uB864\uD074\uB7FD\uB7AD\uD0B9";
+var CMD_BRAWLER_RANK = "/\uBE0C\uB864\uBE0C\uB864\uB7EC\uB7AD\uD0B9 ";
+var CMD_EVENTS = "/\uBE0C\uB864\uC774\uBCA4\uD2B8";
+var CMD_CHAT_RANK = "/\uCC44\uD305\uC21C\uC704";
+var CMD_HELP = "/\uBE0C\uB864\uB3C4\uC6C0\uB9D0";
 
 function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName, isMultiChat) {
   msg = (msg || "").trim();
@@ -166,19 +166,19 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
 }
 
 function handleRoomAuth(room, msg, replier) {
-  const rawKey = msg.substring(CMD_ROOM_AUTH.length).trim();
+  var rawKey = msg.substring(CMD_ROOM_AUTH.length).trim();
   if (!rawKey) {
     throw new Error("\uC778\uC99D \uD0A4\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
   }
 
-  const roomKeys = readJson(ROOM_KEY_PATH);
-  const normalizedKey = String(rawKey).trim();
-  const keyInfo = roomKeys[normalizedKey];
+  var roomKeys = readJson(ROOM_KEY_PATH);
+  var normalizedKey = String(rawKey).trim();
+  var keyInfo = roomKeys[normalizedKey];
   if (!keyInfo || keyInfo.enabled === false) {
     throw new Error("\uC720\uD6A8\uD558\uC9C0 \uC54A\uC740 \uD0A4\uC785\uB2C8\uB2E4.");
   }
 
-  const registry = readJson(ROOM_REGISTRY_PATH);
+  var registry = readJson(ROOM_REGISTRY_PATH);
   if (keyInfo.room && keyInfo.room !== room) {
     throw new Error("\uC774 \uD0A4\uB294 \uC774\uBBF8 \uB2E4\uB978 \uBC29\uC5D0 \uC5F0\uACB0\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.");
   }
@@ -205,8 +205,8 @@ function handleRoomAuth(room, msg, replier) {
 }
 
 function buildRoomStatus(room) {
-  const registry = readJson(ROOM_REGISTRY_PATH);
-  const info = registry[room];
+  var registry = readJson(ROOM_REGISTRY_PATH);
+  var info = registry[room];
   if (!info) {
     return "[\uBC29 \uC778\uC99D \uC0C1\uD0DC]\n\uBBF8\uC778\uC99D";
   }
@@ -222,12 +222,12 @@ function buildRoomStatus(room) {
 }
 
 function isAuthorizedRoom(room) {
-  const registry = readJson(ROOM_REGISTRY_PATH);
+  var registry = readJson(ROOM_REGISTRY_PATH);
   return !!registry[room];
 }
 
 function touchRoomUsage(room) {
-  const registry = readJson(ROOM_REGISTRY_PATH);
+  var registry = readJson(ROOM_REGISTRY_PATH);
   if (!registry[room]) {
     return;
   }
@@ -236,8 +236,8 @@ function touchRoomUsage(room) {
 }
 
 function handleSaveTag(msg, sender, replier) {
-  const tag = normalizeTag(msg.substring(CMD_SAVE_TAG.length).trim());
-  const player = proxyGet("/api/player", { tag: tag });
+  var tag = normalizeTag(msg.substring(CMD_SAVE_TAG.length).trim());
+  var player = proxyGet("/api/player", { tag: tag });
   saveUserTag(sender, tag);
   replier.reply(
     [
@@ -251,8 +251,8 @@ function handleSaveTag(msg, sender, replier) {
 }
 
 function handleRegisterUserAlias(msg, replier) {
-  const parsed = parseAliasRegistration(msg.substring(CMD_REGISTER_USER.length));
-  const aliases = readJson(PLAYER_ALIAS_PATH);
+  var parsed = parseAliasRegistration(msg.substring(CMD_REGISTER_USER.length));
+  var aliases = readJson(PLAYER_ALIAS_PATH);
   aliases[parsed.alias] = normalizeTag(parsed.target);
   writeJson(PLAYER_ALIAS_PATH, aliases);
 
@@ -266,8 +266,8 @@ function handleRegisterUserAlias(msg, replier) {
 }
 
 function handleRegisterClubAlias(msg, replier) {
-  const parsed = parseAliasRegistration(msg.substring(CMD_REGISTER_CLUB.length));
-  const aliases = readJson(CLUB_ALIAS_PATH);
+  var parsed = parseAliasRegistration(msg.substring(CMD_REGISTER_CLUB.length));
+  var aliases = readJson(CLUB_ALIAS_PATH);
   aliases[parsed.alias] = normalizeTag(parsed.target);
   writeJson(CLUB_ALIAS_PATH, aliases);
 
@@ -281,7 +281,7 @@ function handleRegisterClubAlias(msg, replier) {
 }
 
 function handleSavedInfo(sender, replier) {
-  const savedTag = getSavedUserTag(sender);
+  var savedTag = getSavedUserTag(sender);
   if (!savedTag) {
     replier.reply(
       "\uC800\uC7A5\uB41C \uD0DC\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.\n`/" +
@@ -293,12 +293,12 @@ function handleSavedInfo(sender, replier) {
 }
 
 function handleInfoByTag(msg, replier) {
-  const tag = resolvePlayerTagInput(msg.substring(CMD_INFO_WITH_ARG.length).trim());
+  var tag = resolvePlayerTagInput(msg.substring(CMD_INFO_WITH_ARG.length).trim());
   replier.reply(buildPlayerInfoSummary(tag));
 }
 
 function handleSavedBattle(sender, replier) {
-  const savedTag = getSavedUserTag(sender);
+  var savedTag = getSavedUserTag(sender);
   if (!savedTag) {
     replier.reply(
       "\uC800\uC7A5\uB41C \uD0DC\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.\n`/" +
@@ -310,19 +310,19 @@ function handleSavedBattle(sender, replier) {
 }
 
 function handleBattleByTag(msg, replier) {
-  const tag = resolvePlayerTagInput(msg.substring(CMD_BATTLE_WITH_ARG.length).trim());
+  var tag = resolvePlayerTagInput(msg.substring(CMD_BATTLE_WITH_ARG.length).trim());
   replier.reply(buildBattleSummary(tag));
 }
 
 function handleClubSearch(msg, replier) {
-  const query = msg.substring(CMD_CLUB_SEARCH.length).trim();
-  const results = proxyGet("/api/club/search", { name: query });
+  var query = msg.substring(CMD_CLUB_SEARCH.length).trim();
+  var results = proxyGet("/api/club/search", { name: query });
   replier.reply(formatClubSearchResults(query, results));
 }
 
 function handleSaveClub(msg, sender, replier) {
-  const clubTag = normalizeTag(msg.substring(CMD_SAVE_CLUB.length).trim());
-  const club = proxyGet("/api/club", { tag: clubTag });
+  var clubTag = normalizeTag(msg.substring(CMD_SAVE_CLUB.length).trim());
+  var club = proxyGet("/api/club", { tag: clubTag });
   saveUserClubTag(sender, clubTag);
   replier.reply(
     [
@@ -336,7 +336,7 @@ function handleSaveClub(msg, sender, replier) {
 }
 
 function handleSavedClubInfo(sender, replier) {
-  const savedClubTag = getSavedUserClubTag(sender);
+  var savedClubTag = getSavedUserClubTag(sender);
   if (!savedClubTag) {
     replier.reply(
       "\uC800\uC7A5\uB41C \uD074\uB7FD \uD0DC\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.\n`/" +
@@ -348,12 +348,12 @@ function handleSavedClubInfo(sender, replier) {
 }
 
 function handleClubInfoByTag(msg, replier) {
-  const clubTag = resolveClubTagInput(msg.substring(CMD_CLUB_INFO_WITH_ARG.length).trim());
+  var clubTag = resolveClubTagInput(msg.substring(CMD_CLUB_INFO_WITH_ARG.length).trim());
   replier.reply(buildClubInfoSummary(clubTag));
 }
 
 function handleSavedClubMembers(sender, replier) {
-  const savedClubTag = getSavedUserClubTag(sender);
+  var savedClubTag = getSavedUserClubTag(sender);
   if (!savedClubTag) {
     replier.reply(
       "\uC800\uC7A5\uB41C \uD074\uB7FD \uD0DC\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.\n`/" +
@@ -365,12 +365,12 @@ function handleSavedClubMembers(sender, replier) {
 }
 
 function handleClubMembersByTag(msg, replier) {
-  const clubTag = resolveClubTagInput(msg.substring(CMD_CLUB_MEMBERS_WITH_ARG.length).trim());
+  var clubTag = resolveClubTagInput(msg.substring(CMD_CLUB_MEMBERS_WITH_ARG.length).trim());
   replier.reply(buildClubMembersSummary(clubTag));
 }
 
 function handleBrawlerRanking(msg, replier) {
-  const args = msg.substring(CMD_BRAWLER_RANK.length).trim().split(/\s+/);
+  var args = msg.substring(CMD_BRAWLER_RANK.length).trim().split(/\s+/);
   if (!args[0]) {
     throw new Error(
       "\uBE0C\uB864\uB7EC ID\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694. \uC608: /" +
@@ -378,12 +378,12 @@ function handleBrawlerRanking(msg, replier) {
     );
   }
 
-  const brawlerId = parseInt(args[0], 10);
+  var brawlerId = parseInt(args[0], 10);
   if (isNaN(brawlerId)) {
     throw new Error("\uBE0C\uB864\uB7EC ID\uB294 \uC22B\uC790\uC5EC\uC57C \uD569\uB2C8\uB2E4.");
   }
 
-  const location = args[1] ? args[1] : "";
+  var location = args[1] ? args[1] : "";
   replier.reply(buildBrawlerRankingReply(brawlerId, location));
 }
 
@@ -415,33 +415,39 @@ function buildHelpText() {
 }
 
 function buildAliasRegistrySummary() {
-  const playerAliases = readJson(PLAYER_ALIAS_PATH);
-  const clubAliases = readJson(CLUB_ALIAS_PATH);
-  const lines = ["[\uB4F1\uB85D \uBAA9\uB85D]"];
+  var playerAliases = readJson(PLAYER_ALIAS_PATH);
+  var clubAliases = readJson(CLUB_ALIAS_PATH);
+  var lines = ["[\uB4F1\uB85D \uBAA9\uB85D]"];
+  var playerLines = formatGroupedAliases(playerAliases);
+  var clubLines = formatGroupedAliases(clubAliases);
 
   lines.push("");
   lines.push("[\uC720\uC800]");
-  lines.push(...formatGroupedAliases(playerAliases));
+  for (var i = 0; i < playerLines.length; i += 1) {
+    lines.push(playerLines[i]);
+  }
 
   lines.push("");
   lines.push("[\uD074\uB7FD]");
-  lines.push(...formatGroupedAliases(clubAliases));
+  for (var j = 0; j < clubLines.length; j += 1) {
+    lines.push(clubLines[j]);
+  }
 
   return lines.join("\n");
 }
 
 function proxyGet(path, params) {
   ensureProxyBaseUrl();
-  const url = PROXY_BASE_URL + path + "?" + toQueryString(params);
-  const response = org.jsoup.Jsoup
+  var url = PROXY_BASE_URL + path + "?" + toQueryString(params);
+  var response = org.jsoup.Jsoup
     .connect(url)
     .ignoreContentType(true)
     .method(org.jsoup.Connection.Method.GET)
     .timeout(10000)
     .execute();
 
-  const status = response.statusCode();
-  const body = response.body();
+  var status = response.statusCode();
+  var body = response.body();
 
   if (status >= 400) {
     throw new Error("\uD504\uB85D\uC2DC \uC694\uCCAD \uC2E4\uD328 (" + status + "): " + body);
@@ -451,13 +457,13 @@ function proxyGet(path, params) {
 }
 
 function buildPlayerInfoSummary(tag) {
-  const player = proxyGet("/api/player", { tag: tag });
-  const brawlers = player && player.brawlers ? player.brawlers : [];
-  const clubText = player.club
+  var player = proxyGet("/api/player", { tag: tag });
+  var brawlers = player && player.brawlers ? player.brawlers : [];
+  var clubText = player.club
     ? safe(player.club.name) + " (#" + safe(player.club.tag) + ")"
     : "\uC5C6\uC74C";
 
-  const lines = [
+  var lines = [
     "[\uBE0C\uB864 \uC815\uBCF4]",
     safe(player.name) + " (#" + tag + ")",
     "\uD2B8\uB85C\uD53C: " + number(player.trophies) + " | \uCD5C\uACE0: " + number(player.highestTrophies),
@@ -476,7 +482,7 @@ function buildPlayerInfoSummary(tag) {
   if (brawlers.length) {
     lines.push("");
     lines.push("[\uBCF4\uC720 \uBE0C\uB864\uB7EC]");
-    for (let i = 0; i < brawlers.length; i += 1) {
+    for (var i = 0; i < brawlers.length; i += 1) {
       lines.push(formatOwnedBrawlerLine(brawlers[i]));
     }
   }
@@ -485,9 +491,9 @@ function buildPlayerInfoSummary(tag) {
 }
 
 function buildBattleSummary(tag) {
-  const player = proxyGet("/api/player", { tag: tag });
-  const battleLog = proxyGet("/api/player/battlelog", { tag: tag });
-  const items = battleLog && battleLog.items ? battleLog.items.slice(0, MAX_BATTLES) : [];
+  var player = proxyGet("/api/player", { tag: tag });
+  var battleLog = proxyGet("/api/player/battlelog", { tag: tag });
+  var items = battleLog && battleLog.items ? battleLog.items.slice(0, MAX_BATTLES) : [];
 
   if (!items.length) {
     return [
@@ -497,7 +503,7 @@ function buildBattleSummary(tag) {
     ].join("\n");
   }
 
-  const lines = [
+  var lines = [
     "[\uBE0C\uB864 \uC804\uC801]",
     safe(player.name) + " (#" + tag + ")",
     "\uD2B8\uB85C\uD53C: " + number(player.trophies) +
@@ -509,7 +515,7 @@ function buildBattleSummary(tag) {
     "[\uCD5C\uADFC \uC804\uD22C " + items.length + "\uAC1C]"
   ];
 
-  for (let i = 0; i < items.length; i += 1) {
+  for (var i = 0; i < items.length; i += 1) {
     lines.push(formatBattle(items[i], i + 1, tag));
   }
 
@@ -517,9 +523,9 @@ function buildBattleSummary(tag) {
 }
 
 function buildClubInfoSummary(clubTag) {
-  const club = proxyGet("/api/club", { tag: clubTag });
-  const members = club && club.members ? club.members : [];
-  const lines = [
+  var club = proxyGet("/api/club", { tag: clubTag });
+  var members = club && club.members ? club.members : [];
+  var lines = [
     "[\uD074\uB7FD \uC815\uBCF4]",
     safe(club.name) + " (#" + clubTag + ")",
     "\uD074\uB7FD \uD0C0\uC785: " + safe(club.type),
@@ -532,8 +538,8 @@ function buildClubInfoSummary(clubTag) {
   if (members.length) {
     lines.push("");
     lines.push("[\uD074\uB7FD\uC6D0 \uBAA9\uB85D]");
-    for (let i = 0; i < members.length; i += 1) {
-      const member = members[i];
+    for (var i = 0; i < members.length; i += 1) {
+      var member = members[i];
       lines.push(
         (i + 1) + ". " +
         safe(member.name) +
@@ -548,8 +554,8 @@ function buildClubInfoSummary(clubTag) {
 }
 
 function buildClubMembersSummary(clubTag) {
-  const club = proxyGet("/api/club", { tag: clubTag });
-  const members = proxyGet("/api/club/members", { tag: clubTag });
+  var club = proxyGet("/api/club", { tag: clubTag });
+  var members = proxyGet("/api/club/members", { tag: clubTag });
 
   if (!members || !members.items || !members.items.length) {
     return [
@@ -559,15 +565,15 @@ function buildClubMembersSummary(clubTag) {
     ].join("\n");
   }
 
-  const lines = [
+  var lines = [
     "[\uD074\uB7FD\uC6D0 \uBAA9\uB85D]",
     safe(club.name) + " (#" + clubTag + ")",
     "\uBA64\uBC84 \uC218: " + number(members.items.length)
   ];
 
-  const limit = Math.min(members.items.length, 20);
-  for (let i = 0; i < limit; i += 1) {
-    const member = members.items[i];
+  var limit = Math.min(members.items.length, 20);
+  for (var i = 0; i < limit; i += 1) {
+    var member = members.items[i];
     lines.push(
       (i + 1) + ". " +
       safe(member.name) +
@@ -596,15 +602,15 @@ function buildPlayerRankingReply(location) {
 }
 
 function buildPlayerRankingSummary(location) {
-  const rankings = proxyGet("/api/rankings/players", { location: location, limit: RANK_LIMIT });
-  const items = rankings && rankings.items ? rankings.items : [];
+  var rankings = proxyGet("/api/rankings/players", { location: location, limit: RANK_LIMIT });
+  var items = rankings && rankings.items ? rankings.items : [];
   if (!items.length) {
     return "\uCD1D \uD2B8\uB85C\uD53C \uB7AD\uD0B9 \uC815\uBCF4\uB97C \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
   }
 
-  const lines = ["[" + formatLocationLabel(location) + " \uCD1D \uD2B8\uB85C\uD53C \uB7AD\uD0B9]"];
-  for (let i = 0; i < items.length; i += 1) {
-    const player = items[i];
+  var lines = ["[" + formatLocationLabel(location) + " \uCD1D \uD2B8\uB85C\uD53C \uB7AD\uD0B9]"];
+  for (var i = 0; i < items.length; i += 1) {
+    var player = items[i];
     lines.push(
       safe(player.rank) + ". " +
       safe(player.name) +
@@ -627,15 +633,15 @@ function buildClubRankingReply(location) {
 }
 
 function buildClubRankingSummary(location) {
-  const rankings = proxyGet("/api/rankings/clubs", { location: location, limit: RANK_LIMIT });
-  const items = rankings && rankings.items ? rankings.items : [];
+  var rankings = proxyGet("/api/rankings/clubs", { location: location, limit: RANK_LIMIT });
+  var items = rankings && rankings.items ? rankings.items : [];
   if (!items.length) {
     return "\uD074\uB7FD \uB7AD\uD0B9 \uC815\uBCF4\uB97C \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
   }
 
-  const lines = ["[" + formatLocationLabel(location) + " \uD074\uB7FD \uB7AD\uD0B9]"];
-  for (let i = 0; i < items.length; i += 1) {
-    const club = items[i];
+  var lines = ["[" + formatLocationLabel(location) + " \uD074\uB7FD \uB7AD\uD0B9]"];
+  for (var i = 0; i < items.length; i += 1) {
+    var club = items[i];
     lines.push(
       safe(club.rank) + ". " +
       safe(club.name) +
@@ -659,20 +665,20 @@ function buildBrawlerRankingReply(brawlerId, location) {
 }
 
 function buildBrawlerRankingSummary(brawlerId, location) {
-  const rankings = proxyGet("/api/rankings/brawlers", {
+  var rankings = proxyGet("/api/rankings/brawlers", {
     location: location,
     brawler_id: brawlerId,
     limit: RANK_LIMIT
   });
-  const items = rankings && rankings.items ? rankings.items : [];
+  var items = rankings && rankings.items ? rankings.items : [];
   if (!items.length) {
     return "\uBE0C\uB864\uB7EC \uB7AD\uD0B9 \uC815\uBCF4\uB97C \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
   }
 
-  const brawlerName = findBrawlerName(brawlerId);
-  const lines = ["[" + formatLocationLabel(location) + " \uBE0C\uB864\uB7EC \uB7AD\uD0B9] " + safe(brawlerName)];
-  for (let i = 0; i < items.length; i += 1) {
-    const player = items[i];
+  var brawlerName = findBrawlerName(brawlerId);
+  var lines = ["[" + formatLocationLabel(location) + " \uBE0C\uB864\uB7EC \uB7AD\uD0B9] " + safe(brawlerName)];
+  for (var i = 0; i < items.length; i += 1) {
+    var player = items[i];
     lines.push(
       safe(player.rank) + ". " +
       safe(player.name) +
@@ -684,15 +690,15 @@ function buildBrawlerRankingSummary(brawlerId, location) {
 }
 
 function buildEventSummary() {
-  const data = proxyGet("/api/events", {});
-  const activeEvents = data && data.active ? data.active : [];
-  const upcomingEvents = data && data.upcoming ? data.upcoming : [];
-  const lines = ["[\uD604\uC7AC \uC774\uBCA4\uD2B8]"];
+  var data = proxyGet("/api/events", {});
+  var activeEvents = data && data.active ? data.active : [];
+  var upcomingEvents = data && data.upcoming ? data.upcoming : [];
+  var lines = ["[\uD604\uC7AC \uC774\uBCA4\uD2B8]"];
 
   if (!activeEvents.length) {
     lines.push("\uD65C\uC131 \uC774\uBCA4\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.");
   } else {
-    for (let i = 0; i < activeEvents.length; i += 1) {
+    for (var i = 0; i < activeEvents.length; i += 1) {
       lines.push(formatEventLine(activeEvents[i]));
     }
   }
@@ -700,8 +706,8 @@ function buildEventSummary() {
   if (upcomingEvents.length) {
     lines.push("");
     lines.push("[\uC608\uC815 \uC774\uBCA4\uD2B8]");
-    const limit = Math.min(upcomingEvents.length, MAX_BATTLES);
-    for (let j = 0; j < limit; j += 1) {
+    var limit = Math.min(upcomingEvents.length, MAX_BATTLES);
+    for (var j = 0; j < limit; j += 1) {
       lines.push(formatEventLine(upcomingEvents[j]));
     }
   }
@@ -710,11 +716,11 @@ function buildEventSummary() {
 }
 
 function buildChatRankSummary(room) {
-  const data = readJson(CHAT_RANK_PATH);
-  const roomData = data[room] || {};
-  const entries = [];
+  var data = readJson(CHAT_RANK_PATH);
+  var roomData = data[room] || {};
+  var entries = [];
 
-  for (const sender in roomData) {
+  for (var sender in roomData) {
     if (Object.prototype.hasOwnProperty.call(roomData, sender)) {
       entries.push({ name: sender, count: Number(roomData[sender]) || 0 });
     }
@@ -731,23 +737,23 @@ function buildChatRankSummary(room) {
     return String(a.name).localeCompare(String(b.name));
   });
 
-  const lines = ["[\uCC44\uD305 \uC21C\uC704] " + safe(room)];
-  for (let i = 0; i < entries.length; i += 1) {
+  var lines = ["[\uCC44\uD305 \uC21C\uC704] " + safe(room)];
+  for (var i = 0; i < entries.length; i += 1) {
     lines.push((i + 1) + ". " + safe(entries[i].name) + " | " + number(entries[i].count));
   }
   return lines.join("\n");
 }
 
 function formatBattle(item, index, playerTag) {
-  const battle = item.battle || {};
-  const event = item.event || {};
-  const mode = safe(event.mode || battle.mode || "unknown");
-  const map = safe(event.map || "\uB9F5 \uC815\uBCF4 \uC5C6\uC74C");
-  const type = safe(battle.type || "unknown");
-  const brawler = findPlayerBrawler(item, playerTag) || "\uC54C \uC218 \uC5C6\uC74C";
-  const trophyText = formatTrophyChange(battle.trophyChange);
-  const resultText = getResultText(item);
-  const timeText = formatBattleTime(item.battleTime);
+  var battle = item.battle || {};
+  var event = item.event || {};
+  var mode = safe(event.mode || battle.mode || "unknown");
+  var map = safe(event.map || "\uB9F5 \uC815\uBCF4 \uC5C6\uC74C");
+  var type = safe(battle.type || "unknown");
+  var brawler = findPlayerBrawler(item, playerTag) || "\uC54C \uC218 \uC5C6\uC74C";
+  var trophyText = formatTrophyChange(battle.trophyChange);
+  var resultText = getResultText(item);
+  var timeText = formatBattleTime(item.battleTime);
 
   return [
     index + ". " + resultText + " | " + mode + " | " + brawler,
@@ -758,8 +764,8 @@ function formatBattle(item, index, playerTag) {
 }
 
 function getResultText(item) {
-  const battle = item.battle || {};
-  const mode = String(battle.mode || (item.event && item.event.mode) || "");
+  var battle = item.battle || {};
+  var mode = String(battle.mode || (item.event && item.event.mode) || "");
 
   if (battle.result) {
     if (battle.result === "victory") return "\uC2B9\uB9AC";
@@ -788,19 +794,19 @@ function getResultText(item) {
 }
 
 function findPlayerBrawler(item, playerTag) {
-  const battle = item.battle || {};
-  const participants = [];
+  var battle = item.battle || {};
+  var participants = [];
 
   if (battle.teams && battle.teams.length) {
-    for (let i = 0; i < battle.teams.length; i += 1) {
-      for (let j = 0; j < battle.teams[i].length; j += 1) {
+    for (var i = 0; i < battle.teams.length; i += 1) {
+      for (var j = 0; j < battle.teams[i].length; j += 1) {
         participants.push(battle.teams[i][j]);
       }
     }
   }
 
   if (battle.players && battle.players.length) {
-    for (let k = 0; k < battle.players.length; k += 1) {
+    for (var k = 0; k < battle.players.length; k += 1) {
       participants.push(battle.players[k]);
     }
   }
@@ -809,8 +815,8 @@ function findPlayerBrawler(item, playerTag) {
     participants.push(battle.starPlayer);
   }
 
-  for (let m = 0; m < participants.length; m += 1) {
-    const participant = participants[m];
+  for (var m = 0; m < participants.length; m += 1) {
+    var participant = participants[m];
     if (
       participant &&
       participant.tag &&
@@ -826,15 +832,15 @@ function findPlayerBrawler(item, playerTag) {
 }
 
 function formatClubSearchResults(query, results) {
-  const items = results && results.items ? results.items : results;
+  var items = results && results.items ? results.items : results;
   if (!items || !items.length) {
     return "\uD074\uB7FD \uAC80\uC0C9 \uACB0\uACFC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4: " + safe(query);
   }
 
-  const lines = ["[\uD074\uB7FD \uAC80\uC0C9] " + safe(query)];
-  const limit = Math.min(items.length, 10);
-  for (let i = 0; i < limit; i += 1) {
-    const club = items[i];
+  var lines = ["[\uD074\uB7FD \uAC80\uC0C9] " + safe(query)];
+  var limit = Math.min(items.length, 10);
+  for (var i = 0; i < limit; i += 1) {
+    var club = items[i];
     lines.push(
       (i + 1) + ". " +
       safe(club.name) +
@@ -847,21 +853,21 @@ function formatClubSearchResults(query, results) {
 }
 
 function formatEventLine(event) {
-  const slot = event && event.slot ? event.slot.name : "\uC774\uBCA4\uD2B8";
-  const map = event && event.map ? (event.map.name || event.map) : "\uB9F5 \uC815\uBCF4 \uC5C6\uC74C";
-  const mode = event && event.mode ? event.mode : "\uBAA8\uB4DC \uC815\uBCF4 \uC5C6\uC74C";
-  const start = event && event.startTime ? " | \uC2DC\uC791 " + event.startTime : "";
-  const end = event && event.endTime ? " | \uC885\uB8CC " + event.endTime : "";
+  var slot = event && event.slot ? event.slot.name : "\uC774\uBCA4\uD2B8";
+  var map = event && event.map ? (event.map.name || event.map) : "\uB9F5 \uC815\uBCF4 \uC5C6\uC74C";
+  var mode = event && event.mode ? event.mode : "\uBAA8\uB4DC \uC815\uBCF4 \uC5C6\uC74C";
+  var start = event && event.startTime ? " | \uC2DC\uC791 " + event.startTime : "";
+  var end = event && event.endTime ? " | \uC885\uB8CC " + event.endTime : "";
   return "- " + safe(slot) + " | " + safe(mode) + " | " + safe(map) + start + end;
 }
 
 function parseLocationArg(msg, command) {
-  const location = msg.substring(command.length).trim();
+  var location = msg.substring(command.length).trim();
   return location || "";
 }
 
 function resolvePlayerTagInput(input) {
-  const raw = String(input || "").trim();
+  var raw = String(input || "").trim();
   if (!raw) {
     throw new Error("\uD0DC\uADF8 \uB610\uB294 \uBCC4\uCE6D\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
   }
@@ -870,13 +876,13 @@ function resolvePlayerTagInput(input) {
     return normalizeTag(raw);
   }
 
-  const aliases = readJson(PLAYER_ALIAS_PATH);
+  var aliases = readJson(PLAYER_ALIAS_PATH);
   if (aliases[raw]) {
     return normalizeTag(aliases[raw]);
   }
 
-  const lowered = raw.toLowerCase();
-  for (const key in aliases) {
+  var lowered = raw.toLowerCase();
+  for (var key in aliases) {
     if (Object.prototype.hasOwnProperty.call(aliases, key) && String(key).toLowerCase() === lowered) {
       return normalizeTag(aliases[key]);
     }
@@ -886,7 +892,7 @@ function resolvePlayerTagInput(input) {
 }
 
 function resolveClubTagInput(input) {
-  const raw = String(input || "").trim();
+  var raw = String(input || "").trim();
   if (!raw) {
     throw new Error("\uD074\uB7FD \uD0DC\uADF8 \uB610\uB294 \uBCC4\uCE6D\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
   }
@@ -895,13 +901,13 @@ function resolveClubTagInput(input) {
     return normalizeTag(raw);
   }
 
-  const aliases = readJson(CLUB_ALIAS_PATH);
+  var aliases = readJson(CLUB_ALIAS_PATH);
   if (aliases[raw]) {
     return normalizeTag(aliases[raw]);
   }
 
-  const lowered = raw.toLowerCase();
-  for (const key in aliases) {
+  var lowered = raw.toLowerCase();
+  for (var key in aliases) {
     if (Object.prototype.hasOwnProperty.call(aliases, key) && String(key).toLowerCase() === lowered) {
       return normalizeTag(aliases[key]);
     }
@@ -911,8 +917,8 @@ function resolveClubTagInput(input) {
 }
 
 function parseAliasRegistration(raw) {
-  const text = String(raw || "").trim();
-  const match = text.match(/^(\S+)\s+(.+)$/);
+  var text = String(raw || "").trim();
+  var match = text.match(/^(\S+)\s+(.+)$/);
   if (!match) {
     throw new Error("\uD615\uC2DD: \uBCC4\uCE6D \uD0DC\uADF8");
   }
@@ -924,38 +930,38 @@ function parseAliasRegistration(raw) {
 }
 
 function formatGroupedAliases(source) {
-  const grouped = {};
+  var grouped = {};
 
-  for (const alias in source) {
+  for (var alias in source) {
     if (!Object.prototype.hasOwnProperty.call(source, alias)) {
       continue;
     }
 
-    const target = "#" + normalizeTag(source[alias]);
+    var target = "#" + normalizeTag(source[alias]);
     if (!grouped[target]) {
       grouped[target] = [];
     }
     grouped[target].push(alias);
   }
 
-  const targets = Object.keys(grouped).sort();
+  var targets = Object.keys(grouped).sort();
   if (!targets.length) {
     return ["\uB4F1\uB85D\uB41C \uD56D\uBAA9 \uC5C6\uC74C"];
   }
 
-  const lines = [];
-  for (let i = 0; i < targets.length; i += 1) {
-    const target = targets[i];
-    const aliases = grouped[target].sort();
+  var lines = [];
+  for (var i = 0; i < targets.length; i += 1) {
+    var target = targets[i];
+    var aliases = grouped[target].sort();
     lines.push(target + ": " + aliases.join(" "));
   }
   return lines;
 }
 
 function formatOwnedBrawlerLine(brawler) {
-  const gadgets = brawler.gadgets ? brawler.gadgets.length : 0;
-  const starPowers = brawler.starPowers ? brawler.starPowers.length : 0;
-  const gears = brawler.gears ? brawler.gears.length : 0;
+  var gadgets = brawler.gadgets ? brawler.gadgets.length : 0;
+  var starPowers = brawler.starPowers ? brawler.starPowers.length : 0;
+  var gears = brawler.gears ? brawler.gears.length : 0;
   return (
     "- " + safe(brawler.name) +
     " | \uD30C\uC6CC " + number(brawler.power) +
@@ -969,7 +975,7 @@ function formatOwnedBrawlerLine(brawler) {
 }
 
 function formatLocationLabel(location) {
-  const lowered = String(location || "").trim().toLowerCase();
+  var lowered = String(location || "").trim().toLowerCase();
   if (!lowered || lowered === "global" || lowered === "world" || lowered === "\uC138\uACC4") {
     return "\uC138\uACC4";
   }
@@ -981,9 +987,9 @@ function formatLocationLabel(location) {
 
 function findBrawlerName(brawlerId) {
   try {
-    const data = proxyGet("/api/brawlers", {});
-    const items = data && data.items ? data.items : [];
-    for (let i = 0; i < items.length; i += 1) {
+    var data = proxyGet("/api/brawlers", {});
+    var items = data && data.items ? data.items : [];
+    for (var i = 0; i < items.length; i += 1) {
       if (String(items[i].id) === String(brawlerId)) {
         return items[i].name;
       }
@@ -1026,8 +1032,8 @@ function normalizeTag(tag) {
 }
 
 function toQueryString(params) {
-  const pairs = [];
-  for (const key in params) {
+  var pairs = [];
+  for (var key in params) {
     if (Object.prototype.hasOwnProperty.call(params, key) && params[key] !== undefined && params[key] !== null) {
       pairs.push(encodeURIComponent(key) + "=" + encodeURIComponent(String(params[key])));
     }
@@ -1042,7 +1048,7 @@ function ensureProxyBaseUrl() {
 }
 
 function trackChat(room, sender) {
-  const data = readJson(CHAT_RANK_PATH);
+  var data = readJson(CHAT_RANK_PATH);
   if (!data[room]) {
     data[room] = {};
   }
@@ -1058,7 +1064,7 @@ function nowIso() {
 }
 
 function maskKey(value) {
-  const key = String(value || "");
+  var key = String(value || "");
   if (key.length <= 4) {
     return key;
   }
@@ -1081,7 +1087,7 @@ function safe(value) {
 
 function readJson(path) {
   try {
-    const raw = FileStream.read(path);
+    var raw = FileStream.read(path);
     if (!raw) {
       return {};
     }
@@ -1096,23 +1102,24 @@ function writeJson(path, data) {
 }
 
 function saveUserTag(sender, tag) {
-  const data = readJson(STORAGE_PATH);
+  var data = readJson(STORAGE_PATH);
   data[sender] = tag;
   writeJson(STORAGE_PATH, data);
 }
 
 function getSavedUserTag(sender) {
-  const data = readJson(STORAGE_PATH);
+  var data = readJson(STORAGE_PATH);
   return data[sender] || null;
 }
 
 function saveUserClubTag(sender, tag) {
-  const data = readJson(CLUB_STORAGE_PATH);
+  var data = readJson(CLUB_STORAGE_PATH);
   data[sender] = tag;
   writeJson(CLUB_STORAGE_PATH, data);
 }
 
 function getSavedUserClubTag(sender) {
-  const data = readJson(CLUB_STORAGE_PATH);
+  var data = readJson(CLUB_STORAGE_PATH);
   return data[sender] || null;
 }
+
