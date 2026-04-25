@@ -1,0 +1,99 @@
+import os
+from typing import Any
+from urllib.parse import quote
+
+import httpx
+from fastapi import FastAPI, HTTPException, Query
+
+
+API_TIMEOUT_SECONDS = float(os.getenv("BRAWL_API_TIMEOUT", "10"))
+API_AUTH_TOKEN = os.getenv("BRAWL_API_TOKEN", "").strip()
+API_BASE = os.getenv("BRAWL_API_BASE", "https://api.brawlstars.com/v1").rstrip("/")
+
+
+app = FastAPI(title="Brawl Proxy", version="0.1.0")
+
+
+def normalize_tag(tag: str) -> str:
+    cleaned = (tag or "").strip().upper().replace("#", "")
+    cleaned = "".join(ch for ch in cleaned if ch.isalnum())
+    if not cleaned:
+        raise HTTPException(status_code=400, detail="tag is required")
+    return cleaned
+
+
+def encode_tag(tag: str) -> str:
+    return quote(f"#{normalize_tag(tag)}", safe="")
+
+
+def require_token() -> str:
+    if not API_AUTH_TOKEN:
+        raise HTTPException(status_code=500, detail="BRAWL_API_TOKEN is missing")
+    return API_AUTH_TOKEN
+
+
+async def fetch_json(base_url: str, path: str, **params: Any) -> Any:
+    token = require_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+        "User-Agent": "brawl-render-proxy/0.1",
+    }
+
+    async with httpx.AsyncClient(timeout=API_TIMEOUT_SECONDS) as client:
+        try:
+            response = await client.get(f"{base_url}{path}", params=params, headers=headers)
+        except httpx.HTTPError as exc:
+            raise HTTPException(status_code=502, detail=f"upstream request failed: {exc}") from exc
+
+    if response.status_code >= 400:
+        detail = response.text
+        try:
+            detail = response.json()
+        except ValueError:
+            pass
+        raise HTTPException(status_code=response.status_code, detail=detail)
+
+    try:
+        return response.json()
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail="upstream returned non-json response") from exc
+
+
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {
+        "name": "brawl-render-proxy",
+        "status": "ok",
+        "docs": "/docs",
+    }
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.get("/api/player")
+async def get_player(tag: str = Query(..., description="Brawl player tag")) -> Any:
+    return await fetch_json(API_BASE, f"/players/{encode_tag(tag)}")
+
+
+@app.get("/api/player/battlelog")
+async def get_player_battlelog(tag: str = Query(..., description="Brawl player tag")) -> Any:
+    return await fetch_json(API_BASE, f"/players/{encode_tag(tag)}/battlelog")
+
+
+@app.get("/api/club")
+async def get_club(tag: str = Query(..., description="Brawl club tag")) -> Any:
+    return await fetch_json(API_BASE, f"/clubs/{encode_tag(tag)}")
+
+
+@app.get("/api/club/search")
+async def search_club(name: str = Query(..., min_length=1, description="Club name")) -> Any:
+    return await fetch_json(API_BASE, "/clubs", name=name.strip())
+
+
+@app.get("/api/club/members")
+async def get_club_members(tag: str = Query(..., description="Brawl club tag")) -> Any:
+    return await fetch_json(API_BASE, f"/clubs/{encode_tag(tag)}/members")
