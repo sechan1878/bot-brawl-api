@@ -1,0 +1,14 @@
+{
+  "keys": [
+    {
+      "label": "primary",
+      "token": "PUT_BRAWL_API_KEY_HERE",
+      "enabled": false
+    },
+    {
+      "label": "secondary",
+      "token": "PUT_BRAWL_API_KEY_HERE",
+      "enabled": false
+    }
+  ]
+}
