@@ -6,7 +6,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Query
 
 
-API_TIMEOUT_SECONDS = float(os.getenv("BRAWL_API_TIMEOUT", "10"))
+API_TIMEOUT_SECONDS = float(os.getenv("BRAWL_API_TIMEOUT", "20"))
 API_AUTH_TOKEN = os.getenv("BRAWL_API_TOKEN", "").strip()
 API_BASE = os.getenv("BRAWL_API_BASE", "https://api.brawlstars.com/v1").rstrip("/")
 
@@ -77,9 +77,13 @@ async def fetch_json(base_url: str, path: str, **params: Any) -> Any:
         "User-Agent": "brawl-render-proxy/0.1",
     }
 
-    async with httpx.AsyncClient(timeout=API_TIMEOUT_SECONDS) as client:
+    timeout = httpx.Timeout(API_TIMEOUT_SECONDS, connect=10.0)
+
+    async with httpx.AsyncClient(timeout=timeout) as client:
         try:
             response = await client.get(f"{base_url}{path}", params=params, headers=headers)
+        except httpx.TimeoutException as exc:
+            raise HTTPException(status_code=504, detail=f"upstream timeout: {exc}") from exc
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail=f"upstream request failed: {exc}") from exc
 
@@ -107,8 +111,13 @@ async def root() -> dict[str, str]:
 
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health() -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "token_configured": bool(API_AUTH_TOKEN),
+        "api_base": API_BASE,
+        "timeout_seconds": API_TIMEOUT_SECONDS,
+    }
 
 
 @app.get("/api/player")

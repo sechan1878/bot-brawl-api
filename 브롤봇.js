@@ -1,5 +1,12 @@
-var PROXY_BASE_URL = "https://YOUR-RENDER-SERVICE.onrender.com";
-var DB_DIR = "sdcard/msgbot/db/";
+var bot = null;
+try {
+  if (typeof BotManager !== "undefined" && BotManager && BotManager.getCurrentBot) {
+    bot = BotManager.getCurrentBot();
+  }
+} catch (e) {}
+
+var PROXY_BASE_URL = "https://bot-brawl-api.onrender.com";
+var DB_DIR = "/sdcard/msgbot/db/";
 var STORAGE_PATH = DB_DIR + "brawl_tags.json";
 var CLUB_STORAGE_PATH = DB_DIR + "brawl_clubs.json";
 var PLAYER_ALIAS_PATH = DB_DIR + "brawl_aliases.json";
@@ -9,6 +16,7 @@ var ROOM_KEY_PATH = DB_DIR + "brawl_room_keys.json";
 var ROOM_REGISTRY_PATH = DB_DIR + "brawl_room_registry.json";
 var MAX_BATTLES = 5;
 var RANK_LIMIT = 5;
+var FIXED_ROOM_VERIFY_CODE = "verify";
 
 var CMD_ROOM_AUTH = "/\uBE0C\uB864\uC778\uC99D ";
 var CMD_ROOM_STATUS = "/\uBE0C\uB864\uC778\uC99D\uC0C1\uD0DC";
@@ -32,15 +40,27 @@ var CMD_BRAWLER_RANK = "/\uBE0C\uB864\uBE0C\uB864\uB7EC\uB7AD\uD0B9 ";
 var CMD_EVENTS = "/\uBE0C\uB864\uC774\uBCA4\uD2B8";
 var CMD_CHAT_RANK = "/\uCC44\uD305\uC21C\uC704";
 var CMD_HELP = "/\uBE0C\uB864\uB3C4\uC6C0\uB9D0";
+var CMD_TEST = "/\uBE0C\uB864\uD14C\uC2A4\uD2B8";
+var CMD_STATUS = "/\uBE0C\uB864\uC0C1\uD0DC";
 
-function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName, isMultiChat) {
+function handleIncomingMessage(room, msg, sender, isGroupChat, replier, packageName) {
   msg = (msg || "").trim();
   if (!msg) {
     return;
   }
 
   try {
-    if (msg.startsWith(CMD_ROOM_AUTH)) {
+    if (msg === CMD_TEST) {
+      replier.reply("\uBE0C\uB864\uBD07 \uC2E4\uD589 \uC911");
+      return;
+    }
+
+    if (msg === CMD_STATUS) {
+      replier.reply(buildProxyStatusSummary());
+      return;
+    }
+
+    if (startsWithText(msg, CMD_ROOM_AUTH)) {
       handleRoomAuth(room, msg, replier);
       return;
     }
@@ -71,17 +91,17 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
     trackChat(room, sender);
     touchRoomUsage(room);
 
-    if (msg.startsWith(CMD_REGISTER_USER)) {
+    if (startsWithText(msg, CMD_REGISTER_USER)) {
       handleRegisterUserAlias(msg, replier);
       return;
     }
 
-    if (msg.startsWith(CMD_REGISTER_CLUB)) {
+    if (startsWithText(msg, CMD_REGISTER_CLUB)) {
       handleRegisterClubAlias(msg, replier);
       return;
     }
 
-    if (msg.startsWith(CMD_SAVE_TAG)) {
+    if (startsWithText(msg, CMD_SAVE_TAG)) {
       handleSaveTag(msg, sender, replier);
       return;
     }
@@ -91,7 +111,7 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
       return;
     }
 
-    if (msg.startsWith(CMD_INFO_WITH_ARG)) {
+    if (startsWithText(msg, CMD_INFO_WITH_ARG)) {
       handleInfoByTag(msg, replier);
       return;
     }
@@ -101,17 +121,17 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
       return;
     }
 
-    if (msg.startsWith(CMD_BATTLE_WITH_ARG)) {
+    if (startsWithText(msg, CMD_BATTLE_WITH_ARG)) {
       handleBattleByTag(msg, replier);
       return;
     }
 
-    if (msg.startsWith(CMD_CLUB_SEARCH)) {
+    if (startsWithText(msg, CMD_CLUB_SEARCH)) {
       handleClubSearch(msg, replier);
       return;
     }
 
-    if (msg.startsWith(CMD_SAVE_CLUB)) {
+    if (startsWithText(msg, CMD_SAVE_CLUB)) {
       handleSaveClub(msg, sender, replier);
       return;
     }
@@ -121,7 +141,7 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
       return;
     }
 
-    if (msg.startsWith(CMD_CLUB_INFO_WITH_ARG)) {
+    if (startsWithText(msg, CMD_CLUB_INFO_WITH_ARG)) {
       handleClubInfoByTag(msg, replier);
       return;
     }
@@ -131,22 +151,22 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
       return;
     }
 
-    if (msg.startsWith(CMD_CLUB_MEMBERS_WITH_ARG)) {
+    if (startsWithText(msg, CMD_CLUB_MEMBERS_WITH_ARG)) {
       handleClubMembersByTag(msg, replier);
       return;
     }
 
-    if (msg.startsWith(CMD_TOTAL_RANK)) {
+    if (startsWithText(msg, CMD_TOTAL_RANK)) {
       replier.reply(buildPlayerRankingReply(parseLocationArg(msg, CMD_TOTAL_RANK)));
       return;
     }
 
-    if (msg.startsWith(CMD_CLUB_RANK)) {
+    if (startsWithText(msg, CMD_CLUB_RANK)) {
       replier.reply(buildClubRankingReply(parseLocationArg(msg, CMD_CLUB_RANK)));
       return;
     }
 
-    if (msg.startsWith(CMD_BRAWLER_RANK)) {
+    if (startsWithText(msg, CMD_BRAWLER_RANK)) {
       handleBrawlerRanking(msg, replier);
       return;
     }
@@ -165,41 +185,47 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
   }
 }
 
+function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName, isMultiChat) {
+  handleIncomingMessage(room, msg, sender, isGroupChat, replier, packageName);
+}
+
+function onMessage(msg) {
+  handleIncomingMessage(
+    msg.room,
+    msg.content,
+    msg.author ? msg.author.name : "",
+    msg.isGroupChat,
+    msg,
+    msg.packageName
+  );
+}
+
 function handleRoomAuth(room, msg, replier) {
   var rawKey = msg.substring(CMD_ROOM_AUTH.length).trim();
   if (!rawKey) {
     throw new Error("\uC778\uC99D \uD0A4\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
   }
 
-  var roomKeys = readJson(ROOM_KEY_PATH);
-  var normalizedKey = String(rawKey).trim();
-  var keyInfo = roomKeys[normalizedKey];
-  if (!keyInfo || keyInfo.enabled === false) {
+  var normalizedKey = String(rawKey).trim().toLowerCase();
+  if (normalizedKey !== FIXED_ROOM_VERIFY_CODE) {
     throw new Error("\uC720\uD6A8\uD558\uC9C0 \uC54A\uC740 \uD0A4\uC785\uB2C8\uB2E4.");
   }
 
   var registry = readJson(ROOM_REGISTRY_PATH);
-  if (keyInfo.room && keyInfo.room !== room) {
-    throw new Error("\uC774 \uD0A4\uB294 \uC774\uBBF8 \uB2E4\uB978 \uBC29\uC5D0 \uC5F0\uACB0\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.");
-  }
-
-  roomKeys[normalizedKey].room = room;
-  roomKeys[normalizedKey].lastActivatedAt = nowIso();
   registry[room] = {
-    key: normalizedKey,
-    label: safe(keyInfo.label || ""),
+    key: FIXED_ROOM_VERIFY_CODE,
+    label: "fixed_verify",
     activatedAt: registry[room] && registry[room].activatedAt ? registry[room].activatedAt : nowIso(),
     lastUsedAt: nowIso()
   };
 
-  writeJson(ROOM_KEY_PATH, roomKeys);
   writeJson(ROOM_REGISTRY_PATH, registry);
 
   replier.reply(
     [
       "\uBC29 \uC778\uC99D\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
       "\uBC29: " + safe(room),
-      "\uD0A4 \uB77C\uBCA8: " + safe(keyInfo.label || "")
+      "\uD0A4 \uB77C\uBCA8: fixed_verify"
     ].join("\n")
   );
 }
@@ -390,6 +416,7 @@ function handleBrawlerRanking(msg, replier) {
 function buildHelpText() {
   return [
     "[\uBE0C\uB864 \uC804\uC801 \uBD07 \uB3C4\uC6C0\uB9D0]",
+    "/\uBE0C\uB864\uC0C1\uD0DC",
     "/\uBE0C\uB864\uC778\uC99D \uD0A4",
     "/\uBE0C\uB864\uC778\uC99D\uC0C1\uD0DC",
     "/\uB4F1\uB85D \uC720\uC800 \uBCC4\uCE6D #\uD0DC\uADF8",
@@ -439,21 +466,64 @@ function buildAliasRegistrySummary() {
 function proxyGet(path, params) {
   ensureProxyBaseUrl();
   var url = PROXY_BASE_URL + path + "?" + toQueryString(params);
-  var response = org.jsoup.Jsoup
-    .connect(url)
-    .ignoreContentType(true)
-    .method(org.jsoup.Connection.Method.GET)
-    .timeout(10000)
-    .execute();
+  var lastError = null;
+  var attempt;
 
-  var status = response.statusCode();
-  var body = response.body();
+  for (attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      var response = org.jsoup.Jsoup
+        .connect(url)
+        .ignoreContentType(true)
+        .method(org.jsoup.Connection.Method.GET)
+        .timeout(30000)
+        .execute();
 
-  if (status >= 400) {
-    throw new Error("\uD504\uB85D\uC2DC \uC694\uCCAD \uC2E4\uD328 (" + status + "): " + body);
+      var status = response.statusCode();
+      var body = response.body();
+
+      if (status >= 400) {
+        throw new Error("\uD504\uB85D\uC2DC \uC694\uCCAD \uC2E4\uD328 (" + status + "): " + body);
+      }
+
+      return JSON.parse(body);
+    } catch (e) {
+      lastError = e;
+      if (attempt === 0) {
+        try {
+          java.lang.Thread.sleep(1500);
+        } catch (ignored) {}
+      }
+    }
   }
 
-  return JSON.parse(body);
+  throw lastError || new Error("\uD504\uB85D\uC2DC \uC694\uCCAD \uC2E4\uD328");
+}
+
+function buildProxyStatusSummary() {
+  var lines = ["[\uBE0C\uB864 \uC0C1\uD0DC]", "\uC2A4\uD06C\uB9BD\uD2B8: \uC2E4\uD589 \uC911"];
+
+  if (!PROXY_BASE_URL || PROXY_BASE_URL.indexOf("YOUR-RENDER-SERVICE") >= 0) {
+    lines.push("\uD504\uB85D\uC2DC \uC8FC\uC18C: \uBBF8\uC124\uC815");
+    return lines.join("\n");
+  }
+
+  lines.push("\uD504\uB85D\uC2DC: " + PROXY_BASE_URL);
+
+  try {
+    var response = org.jsoup.Jsoup
+      .connect(PROXY_BASE_URL + "/health")
+      .ignoreContentType(true)
+      .method(org.jsoup.Connection.Method.GET)
+      .timeout(15000)
+      .execute();
+
+    lines.push("HTTP: " + response.statusCode());
+    lines.push("BODY: " + response.body());
+  } catch (e) {
+    lines.push("\uD5EC\uC2A4 \uC2E4\uD328: " + safe(e.message || String(e)));
+  }
+
+  return lines.join("\n");
 }
 
 function buildPlayerInfoSummary(tag) {
@@ -866,6 +936,12 @@ function parseLocationArg(msg, command) {
   return location || "";
 }
 
+function startsWithText(text, prefix) {
+  text = safe(text);
+  prefix = safe(prefix);
+  return text.indexOf(prefix) === 0;
+}
+
 function resolvePlayerTagInput(input) {
   var raw = String(input || "").trim();
   if (!raw) {
@@ -1086,19 +1162,73 @@ function safe(value) {
 }
 
 function readJson(path) {
+  var candidates = getPathCandidates(path);
+  var i;
   try {
-    var raw = FileStream.read(path);
-    if (!raw) {
-      return {};
+    for (i = 0; i < candidates.length; i += 1) {
+      var raw = FileStream.read(candidates[i]);
+      if (raw) {
+        return JSON.parse(raw);
+      }
     }
-    return JSON.parse(raw);
   } catch (e) {
-    return {};
+    try {
+      for (i = 0; i < candidates.length; i += 1) {
+        var retryRaw = FileStream.read(candidates[i]);
+        if (retryRaw) {
+          return JSON.parse(retryRaw);
+        }
+      }
+    } catch (ignored) {}
   }
+  return {};
 }
 
 function writeJson(path, data) {
-  FileStream.write(path, JSON.stringify(data));
+  var candidates = getPathCandidates(path);
+  var target = candidates[0];
+  var i;
+  for (i = 0; i < candidates.length; i += 1) {
+    try {
+      if (FileStream.read(candidates[i]) !== null) {
+        target = candidates[i];
+        break;
+      }
+    } catch (e) {}
+  }
+  FileStream.write(target, JSON.stringify(data));
+}
+
+function getPathCandidates(path) {
+  var list = [];
+  pushUnique(list, path);
+
+  if (path.indexOf("/sdcard/") === 0) {
+    pushUnique(list, path.substring(1));
+    pushUnique(list, path.replace("/sdcard/", "/storage/emulated/0/"));
+  }
+
+  if (path.indexOf("sdcard/") === 0) {
+    pushUnique(list, "/" + path);
+    pushUnique(list, path.replace("sdcard/", "/storage/emulated/0/"));
+  }
+
+  if (path.indexOf("/storage/emulated/0/") === 0) {
+    pushUnique(list, path.replace("/storage/emulated/0/", "/sdcard/"));
+    pushUnique(list, path.replace("/storage/emulated/0/", "sdcard/"));
+  }
+
+  return list;
+}
+
+function pushUnique(list, value) {
+  var i;
+  for (i = 0; i < list.length; i += 1) {
+    if (list[i] === value) {
+      return;
+    }
+  }
+  list.push(value);
 }
 
 function saveUserTag(sender, tag) {
@@ -1121,5 +1251,9 @@ function saveUserClubTag(sender, tag) {
 function getSavedUserClubTag(sender) {
   var data = readJson(CLUB_STORAGE_PATH);
   return data[sender] || null;
+}
+
+if (bot && typeof Event !== "undefined" && Event && Event.MESSAGE) {
+  bot.addListener(Event.MESSAGE, onMessage);
 }
 
